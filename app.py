@@ -11,6 +11,7 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['UPLOAD_FOLDER'] = "./static/profile_pics"
 
+
 SECRET_KEY = 'GETIT'
 
 client = MongoClient('localhost', 27017)
