@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <!-- Webpage Title -->
+    <title>Get It?</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <!-- Font Awesome CSS -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../static/ckeditor5/sample/styles.css">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet">
+
+    <style>
+
+        a.dropdown-item {
+            width: 100px;
+            text-align: center;
+            padding: 6px 18px;
+        }
+
+    </style>
+
+    <script>
+
+        function toggle1() {
+            $("#setting1").toggleClass("is-active")
+            if ($("#setting2").hasClass("is-active")) {
+                $("#setting2").removeClass("is-active")
+            }
+        }
+
+        function toggle2() {
+            $("#setting2").toggleClass("is-active")
+            if ($("#setting1").hasClass("is-active")) {
+                $("#setting1").removeClass("is-active")
+            }
+        }
+
+        function sign_out() {
+            $.removeCookie('mytoken', {path: '/'});
+            window.location.href = "/login"
+        }
+
+        function post_card(code) {
+            let posttype = '';
+            if ($('#postbt').hasClass('is-light')) {
+                posttype = 'close';
+            } else {
+                posttype = 'open';
+            }
+            $.ajax({
+                type: "POST",
+                url: "/post_card",
+                data: {
+                    code_give: code,
+                    type_give: posttype
+                },
+                success: function (response) {
+                    if ($('#postbt').hasClass('is-light')) {
+                        $('#postbt').removeClass('is-light').text('포스팅');
+                    } else {
+                        $('#postbt').addClass('is-light').text('포스팅 취소');
+                    }
+
+                }
+            })
+        }
+
+        function delete_card(code) {
+            $.ajax({
+                type: "POST",
+                url: "/delete_card",
+                data: {
+                    code_give: code
+                },
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert(response["msg"]);
+                        window.location.href = "/";
+                    }
+
+                }
+            })
+        }
+
+        function toggle_like(card_id, type) {
+            console.log(card_id, type)
+            let full_icons = {"heart": "fa-heart", "star": "fa-star"}
+            let empty_icons = {"heart": "fa-heart-o", "star": "fa-star-o"}
+            if (type == "heart") {
+                let icon = $('#heart-icon')
+                if (icon.hasClass(full_icons[type])) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/update_type",
+                        data: {
+                            card_id_give: card_id,
+                            type_give: type,
+                            action_give: "unlike"
+                        },
+                        success: function (response) {
+                            console.log("unlike")
+                            icon.addClass(empty_icons[type]).removeClass(full_icons[type])
+                        }
+                    })
+                } else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/update_type",
+                        data: {
+                            card_id_give: card_id,
+                            type_give: type,
+                            action_give: "like"
+                        },
+                        success: function (response) {
+                            console.log("like")
+                            icon.addClass(full_icons[type]).removeClass(empty_icons[type])
+                        }
+                    })
+                }
+
+            } else {
+                let icon = $('#star-icon')
+                if (icon.hasClass(full_icons[type])) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/update_type",
+                        data: {
+                            card_id_give: card_id,
+                            type_give: type,
+                            action_give: "unlike"
+                        },
+                        success: function (response) {
+                            console.log("unlike")
+                            icon.addClass(empty_icons[type]).removeClass(full_icons[type])
+                        }
+                    })
+                } else {
+                    $.ajax({
+                        type: "POST",
+                        url: "/update_type",
+                        data: {
+                            card_id_give: card_id,
+                            type_give: type,
+                            action_give: "like"
+                        },
+                        success: function (response) {
+                            console.log("like")
+                            icon.addClass(full_icons[type]).removeClass(empty_icons[type])
+                        }
+                    })
+                }
+            }
+        }
+
+    </script>
+</head>
+<body>
+<nav class="navbar" role="navigation" aria-label="main navigation"
+     style="width: 70vw; margin: auto; padding-top: 20px;">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+            <strong class="is-getit"
+                    style="font-family: 'Pacifico', cursive;font-size: 30px;">Get It?</strong>
+        </a>
+    </div>
+    {% if status %}
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <div class="dropdown" id="setting1">
+                            <div class="dropdown-trigger">
+                                <button class="button" aria-haspopup="true"
+                                        aria-controls="dropdown-menu1 dropdown-menu2"
+                                        onclick="toggle1()">
+                                <span class="icon is-small">
+                                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                                </span>
+                                </button>
+                            </div>
+                            <div class="dropdown-menu" id="dropdown-menu1" role="menu" style="min-width: 100px">
+                                <div class="dropdown-content">
+                                    <a href="/write/{{ user_info.username }}" class="dropdown-item">
+                                        새글 작성
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown" id="setting2">
+                            <div class="dropdown-trigger">
+                                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu2"
+                                        onclick="toggle2()" style="margin-left: 10px;">
+                                <span class="icon is-small">
+                                    <i class="fa fa-bars" aria-hidden="true"></i>
+                                </span>
+                                </button>
+                            </div>
+                            <div class="dropdown-menu" id="dropdown-menu2" role="menu" style="min-width: 100px;">
+                                <div class="dropdown-content">
+                                    <a href="#" class="dropdown-item" onclick="$('#modal-edit').addClass('is-active')">
+                                        프로필 수정
+                                    </a>
+                                    <hr class="dropdown-divider">
+                                    <a class="dropdown-item" onclick="sign_out()">
+                                        로그아웃
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-primary" href="/user/{{ payload.id }}">
+                            my page
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</nav>
+<div class="modal" id="modal-edit">
+    <div class="modal-background" onclick='$("#modal-edit").removeClass("is-active")'></div>
+    <div class="modal-content">
+        <div class="box">
+            <article class="media">
+                <div class="media-content">
+                    <div class="field">
+                        <label class="label" for="input-name">닉네임</label>
+
+                        <p class="control">
+
+                            <input id="input-name" class="input"
+                                   placeholder="홍길동" value="{{ user_info.profile_name }}">
+                        </p>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="input-pic">프로필 사진</label>
+
+                        <div class="control is-expanded">
+                            <div class="file has-name">
+                                <label class="file-label" style="width:100%">
+                                    <input id="input-pic" class="file-input" type="file"
+                                           name="resume">
+                                    <span class="file-cta"><span class="file-icon"><i
+                                            class="fa fa-upload"></i></span>
+                                <span class="file-label">파일 선택</span>
+                            </span>
+                                    <span id="file-name" class="file-name"
+                                          style="width:100%;max-width:100%">{{ user_info.profile_pic }}</span>
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="textarea-about">나는 누구?</label>
+
+                        <p class="control">
+
+                        <textarea id="textarea-about" class="textarea"
+                                  placeholder="자기소개하기">{{ user_info.profile_info }}</textarea>
+                        </p>
+                    </div>
+                    <nav class="level is-mobile">
+                        <div class="level-left">
+
+                        </div>
+                        <div class="level-right">
+                            <div class="level-item">
+                                <a class="button is-primary is-light" onclick="update_profile()">업데이트</a>
+                            </div>
+                            <div class="level-item">
+                                <a class="button is-link is-light is-outlined"
+                                   onclick='$("#modal-edit").removeClass("is-active")'>취소</a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </article>
+        </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"
+            onclick='$("#modal-edit").removeClass("is-active")'></button>
+</div>
+<section class="hero is-medium"
+         style="width: 800px; height: 280px; margin: auto; border-bottom: 1px solid #c0c0c0; margin-bottom: 50px;">
+    <div class="hero-body" style="height: 100%; padding: 50px 50px 20px 80px; display: flex;">
+        <div class="profile-img" style="display: inline; width: 210px;">
+            <figure class="image is-128x128" style="width: 210px; height: 210px; display: inline-block;">
+                <img class="is-rounded" style="object-fit: cover; height: 210px;"
+                     src="{{ url_for('static', filename=user_info.profile_pic_real) }}">
+            </figure>
+        </div>
+        <div class="profile-info" style="padding: 50px 50px; display: inline-block; width: 430px; float: left;">
+            <p>
+                <strong>{{ user_info.profile_name }}</strong> <small>@{{ user_info.username }}</small>
+                <br>
+                <br>
+                <span style="color: #00bfff">{{ user_info.profile_info }}</span>
+            </p>
+        </div>
+    </div>
+</section>
+<section class="hero is-medium" style="width: 800px; margin: auto; margin-bottom: 50px;">
+    <div class="blogbox">
+        <strong>{{ card_info.blogbox|safe }}</strong>
+    </div>
+
+</section>
+{% if status %}
+    <div class="buttons" style="margin: auto; width: 250px;">
+        {% if card_info['stat'] %}
+            <button class="button is-success is-light" id="postbt" onclick="post_card('{{ card_info['_id'] }}');">포스팅 취소
+            </button>
+        {% else %}
+            <button class="button is-success" id="postbt" onclick="post_card('{{ card_info['_id'] }}');">포스팅</button>
+        {% endif %}
+        <button class="button is-warning">수정</button>
+        <button class="button is-danger" onclick="$('#delete-modal').addClass('is-active')">삭제</button>
+    </div>
+{% else %}
+    <div class="buttons" style="margin: auto; width: 120px;">
+        <a aria-label="heart" onclick="toggle_like('{{ card_info['_id'] }}', 'heart')"
+           class="button is-danger is-focused is-light">
+            {% if card_info["heart_by_me"] %}
+                <i class="fa fa-heart" aria-hidden="true" id="heart-icon"></i>
+            {% else %}
+                <i class="fa fa-heart-o" aria-hidden="true" id="heart-icon"></i>
+            {% endif %}
+        </a>
+        <a aria-label="star" onclick="toggle_like('{{ card_info['_id'] }}', 'star')"
+           class="button is-warning is-focused is-light">
+            {% if card_info['{{ myid }}'] %}
+                <i id="star-icon" class="fa fa-star" aria-hidden="true"></i>
+            {% else %}
+                <i id="star-icon" class="fa fa-star-o" aria-hidden="true"></i>
+            {% endif %}
+        </a>
+    </div>
+{% endif %}
+<div class="modal" id="delete-modal">
+    <div class="modal-background" onclick='$("#delete-modal").removeClass("is-active")'></div>
+    <div class="modal-content">
+        <div class="box" style="width: 300px; margin: auto;">
+            <article class="media">
+                <div class="media-content">
+                    <div class="field">
+                        <label class="label" for="textarea-about">게시글을 삭제합니다.</label>
+
+                    </div>
+                    <nav class="level is-mobile">
+                        <div class="level-left">
+
+                        </div>
+                        <div class="level-right">
+                            <div class="level-item">
+                                <a class="button is-sparta" onclick="delete_card('{{ card_info['_id'] }}')">확인</a>
+                            </div>
+                            <div class="level-item">
+                                <a class="button is-sparta is-outlined"
+                                   onclick='$("#delete-modal").removeClass("is-active")'>취소</a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </article>
+        </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"
+            onclick='$("#delete-modal").removeClass("is-active")'></button>
+</div>
+</body>
+</html>

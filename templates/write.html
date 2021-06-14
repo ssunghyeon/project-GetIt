@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <!-- Webpage Title -->
+    <title>Get It?</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <!-- Font Awesome CSS -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../static/ckeditor5/sample/styles.css">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet">
+
+    <style>
+
+    </style>
+
+    <script>
+
+        function posting() {
+            let time = $('#input-time').val();
+            let tag = $('#input-tag').val();
+            let today = new Date().toISOString();
+            let blogbox = editor.getData();
+
+            let file = $('#input-img')[0].files[0]
+            let form_data = new FormData()
+
+            form_data.append("blogbox_give", blogbox)
+            form_data.append("file_give", file)
+            form_data.append("time_give", time)
+            form_data.append("tag_give", tag)
+            form_data.append("date_give", today)
+
+            $.ajax({
+                type: "POST",
+                url: "/posting",
+                data: form_data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert(response["msg"])
+                    window.location.href = "/user/{{ user_info.username }}"
+                }
+
+            })
+        }
+
+    </script>
+
+
+</head>
+<body data-editor="ClassicEditor" data-collaboration="false">
+<nav class="navbar" role="navigation" aria-label="main navigation"
+     style="width: 70vw; margin: auto; padding-top: 20px;">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+            <strong class="is-getit"
+                    style="font-family: 'Pacifico', cursive;font-size: 30px;">Get It?</strong>
+        </a>
+    </div>
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <div class="buttons">
+                    <button class="button is-info" onclick="posting()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<section style="margin-top: 30px;">
+    <div class="title-box"
+         style="display: flex; justify-content: center; width: 800px; height: 300px; margin: auto; border: 1px solid #c0c0c0; border-radius: 10px 10px 0 0; border-bottom: none; padding: 20px 20px; background-color: #f0f8ff;">
+        <div class="title-img" style="width: 410px; height: 280px;">
+            <article class="media">
+                <div class="media-content">
+                    <div class="field" style="width: 400px; height: 50px">
+                        <figure class="" style="width: 320px; height: 210px; padding: 10px 0 0 15px;">
+                            <img src="http://www.travelnbike.com/news/photo/201903/77604_141293_4837.png" style="border-radius: 5px;">
+                        </figure>
+                        <div class="control is-expanded" style="padding-top: 5px;">
+                            <div class="file is-small has-name">
+                                <label class="file-label" style="width:335px; background-color: white;">
+                                    <input id="input-img" class="file-input" type="file"
+                                           name="resume">
+                                    <span class="file-cta"><span class="file-icon"><i
+                                            class="fa fa-upload"></i></span>
+                                    <span class="file-label">대표 사진</span>
+                                    </span>
+                                    <span id="file-name" class="file-name"
+                                          style="width:100%;max-width:100%"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <div class="title-info" style="width: 300px; height: 250px; float: right;">
+            <article class="media">
+                <div class="media-content">
+                    <div class="field">
+                        <label class="label" for="input-time">DATE</label>
+                        <p class="control">
+                            <input id="input-time" class="input"
+                                   placeholder="ex)2020.04.01">
+                        </p>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="textarea-about">Comment</label>
+
+                        <p class="control">
+
+                        <textarea id="input-tag" class="textarea"
+                                  placeholder="태그를 달아주세요.ex)#제주#애월맛집"></textarea>
+                        </p>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+<div class="centered" style="width: 1000px; margin: auto; margin-bottom: 30px;">
+    <div class="row row-editor">
+        <textarea class="editor" id="editor">
+
+        </textarea>
+    </div>
+</div>
+<script src="../static/ckeditor5/build/ckeditor.js"></script>
+<script>ClassicEditor
+    .create(document.querySelector('#editor'), {
+
+        toolbar: {
+            items: [
+                'heading',
+                '|',
+                'fontFamily',
+                'bold',
+                'fontColor',
+                'fontBackgroundColor',
+                'fontSize',
+                'alignment',
+                '|',
+                'specialCharacters',
+                'bulletedList',
+                'numberedList',
+                '|',
+                'outdent',
+                'indent',
+                '|',
+                'imageUpload',
+                'link',
+                'blockQuote',
+                'insertTable',
+                'mediaEmbed',
+                'CKFinder',
+                '|',
+                'undo',
+                'redo'
+            ]
+        },
+        language: 'ko',
+        image: {
+            toolbar: [
+                'imageTextAlternative',
+                'imageStyle:full',
+                'imageStyle:side'
+            ]
+        },
+        table: {
+            contentToolbar: [
+                'tableColumn',
+                'tableRow',
+                'mergeTableCells'
+            ]
+        },
+        licenseKey: '',
+
+
+    })
+    .then(editor => {
+        window.editor = editor;
+
+
+    })
+    .catch(error => {
+        console.error('Oops, something went wrong!');
+        console.error('Please, report the following error on https://github.com/ckeditor/ckeditor5/issues with the build id and the error stack trace:');
+        console.warn('Build id: pguuxz1j58e9-7d9vuyqx1x30');
+        console.error(error);
+    });
+</script>
+</body>
+</html>
